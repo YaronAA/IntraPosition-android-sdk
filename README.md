@@ -1,5 +1,5 @@
 # Intraposition Android Sdk
-Interposition's Android Sdk is a wrapper around the main API calls to Intraposition's REST API. It  Simplifies the calls by managing token handling and parsing the results. In addition the sdk define interfaces  for interacting with Intraposition I-Frame.
+Intraposition's Android Sdk is a wrapper around the main API calls to Intraposition's REST API. It  Simplifies the calls by managing token handling and parsing the results. In addition the sdk define interfaces  for interacting with Intraposition I-Frame.
 ## Prerequisites
 **Minimum android SDK :**   23,
 
