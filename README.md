@@ -6,7 +6,7 @@ Interposition's Android Sdk is a wrapper around the main API calls to Interposit
 android.permission.INTERNET, android.permission.ACCESS_NETWORK_STATE
 ## installation
 ***step 1.*** Add it in your root build.gradle at the end of repositories:
-```json
+```java
 		allprojects {
 			repositories {
 				...
@@ -15,7 +15,7 @@ android.permission.INTERNET, android.permission.ACCESS_NETWORK_STATE
 		}
 ```
 ***step 2.*** Add the dependency:
-```json
+```java
 		dependencies {
 			implementation 'com.github.YaronAA:IntraPosition-android-sdk:Tag'
 		}
