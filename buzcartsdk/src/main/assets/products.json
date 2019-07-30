@@ -1,0 +1,17 @@
+[
+  {
+    "upc": "038000138416",
+    "priority": 0,
+    "status": "wanted"
+  },
+  {
+    "upc": "7290000120836",
+    "priority": 0,
+    "status": "wanted"
+  },
+  {
+    "upc": "75544000019",
+    "priority": 0,
+    "status": "taken"
+  }
+]

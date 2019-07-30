@@ -1,0 +1,42 @@
+{
+  "triggersData": {
+    "triggers": [
+      {
+        "triggerId": "123",
+        "locations": [
+          {
+            "upc": "fake_upc_2_11",
+            "distance": 111.5
+          },
+          {
+            "point": [
+              17.0,
+              26.0
+            ]
+          }
+        ],
+        "triggerMetadata": {
+          "maxActs": 1
+        }
+      },
+      {
+        "triggerId": "124",
+        "maxActs": 1,
+        "locations": [
+          {
+            "upc": "fake_upc_35_14",
+            "distance": 2.5
+          }
+        ],
+        "triggerMetadata": {
+          "maxActs": 1
+        }
+      }
+    ],
+    "triggersMetadata": {
+      "maxActs": 3,
+      "timeBetweenActs": 15,
+      "timeFromStart": 25
+    }
+  }
+}
