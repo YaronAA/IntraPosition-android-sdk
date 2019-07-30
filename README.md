@@ -20,10 +20,4 @@ android.permission.INTERNET, android.permission.ACCESS_NETWORK_STATE
 		dependencies {
 			implementation 'com.github.YaronAA:IntraPosition-android-sdk:Tag'
 		}
-```
-##  Getting Started
- In order to use the sdk you must first initilize it with a context and base url.
- ```javascript
-   BuzCartSdk.getInstance().init(getApplicationContext(),baseUrl) 
- ```
- baseUrl is the url of intrapositions server ( e.g. .....)
+
