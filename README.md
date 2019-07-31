@@ -18,6 +18,6 @@ android.permission.INTERNET, android.permission.ACCESS_NETWORK_STATE
 ***step 2.*** Add the dependency:
 ```java
 		dependencies {
-			implementation 'com.github.YaronAA:IntraPosition-android-sdk:Tag'
+			implementation ' implementation 'com.github.YaronAA:IntraPosition-android-sdk:1.0.0'
 		}
 
