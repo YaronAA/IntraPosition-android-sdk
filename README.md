@@ -21,7 +21,7 @@ android.permission.INTERNET, android.permission.ACCESS_NETWORK_STATE
 			implementation 'com.github.YaronAA:IntraPosition-android-sdk:1.0.0'
 		}
 ```
-for more details see our [Gettin Started](https://github.com/YaronAA/IntraPosition-android-sdk/wiki/Getting-Started) guide as well as the full [function reference](https://github.com/YaronAA/IntraPosition-android-sdk/wiki/Function-Reference)
+for more details see our [Getting Started](https://github.com/YaronAA/IntraPosition-android-sdk/wiki/Getting-Started) guide as well as the full [function reference](https://github.com/YaronAA/IntraPosition-android-sdk/wiki/Function-Reference)
 
 
 
