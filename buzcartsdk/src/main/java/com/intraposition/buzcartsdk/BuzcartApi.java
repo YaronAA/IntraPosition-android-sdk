@@ -1,10 +1,10 @@
 package com.intraposition.buzcartsdk;
 
+import com.google.gson.JsonObject;
 import com.intraposition.buzcartsdk.models.Orders;
 import com.intraposition.buzcartsdk.models.PdtProduct;
 import com.intraposition.buzcartsdk.models.Product;
 import com.intraposition.buzcartsdk.models.Trigger;
-import com.intraposition.buzcartsdk.models.Triggers;
 import com.intraposition.buzcartsdk.network.BaseResponse;
 import com.intraposition.buzcartsdk.network.OrderUpdateResponse;
 import com.intraposition.buzcartsdk.network.PdtProductUpdateResponse;
@@ -13,6 +13,8 @@ import com.intraposition.buzcartsdk.network.PdtRegisterResponse;
 import com.intraposition.buzcartsdk.network.PdtTagStatusResponse;
 import com.intraposition.buzcartsdk.network.RegisterReq;
 import com.intraposition.buzcartsdk.network.RegisterResponse;
+
+
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -36,11 +38,11 @@ public interface BuzcartApi {
     @Headers({"content-type: application/json"})
     @POST("api/v2/picking/triggers/update")
     Call<BaseResponse> updateTrigger(@Header("authorization") String token,
-                                     @Body Triggers triggers);
+                                     @Body JsonObject triggers);
 
     @Headers({"content-type: application/json"})
     @POST("api/v2/picking/triggers/ack")
-    Call<BaseResponse> ackTrigger(@Header("authorization") String token, @Body Trigger trigger);
+    Call<BaseResponse> ackTrigger(@Header("authorization") String token, @Body JsonObject trigger);
 
     @Headers({"content-type: application/json"})
     @POST("api/v2/picking/order/close")
@@ -58,7 +60,7 @@ public interface BuzcartApi {
     @Headers({"content-type: application/json"})
     @POST("api/v2/picking/order/productUpdate")
     Call<OrderUpdateResponse> productUpdate(@Header("authorization") String token,
-                       @Body Product product);
+                                            @Body Product product);
 
     // --------------------------------- Pdt API ----------------------------------------------
 

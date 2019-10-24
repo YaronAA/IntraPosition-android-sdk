@@ -3,12 +3,13 @@ package com.intraposition.buzcartsdk;
 import android.content.Context;
 import android.util.Log;
 
+import com.google.gson.ExclusionStrategy;
+import com.google.gson.FieldAttributes;
+import com.google.gson.GsonBuilder;
 import com.intraposition.buzcartsdk.models.Order;
 import com.intraposition.buzcartsdk.models.Orders;
 import com.intraposition.buzcartsdk.models.PdtProduct;
 import com.intraposition.buzcartsdk.models.Product;
-import com.intraposition.buzcartsdk.models.Trigger;
-import com.intraposition.buzcartsdk.models.Triggers;
 import com.intraposition.buzcartsdk.network.BaseCallbackConverter;
 import com.intraposition.buzcartsdk.network.BaseResponse;
 import com.intraposition.buzcartsdk.network.BuzCartCallback;
@@ -22,6 +23,8 @@ import com.intraposition.buzcartsdk.network.PdtUserRegisterResponse;
 import com.intraposition.buzcartsdk.network.RegisterReq;
 import com.intraposition.buzcartsdk.network.RegisterResponse;
 import com.intraposition.buzcartsdk.network.UserRegisterResponse;
+
+import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,11 +54,13 @@ public class BuzCartClient {
 
     private Context context;
 
+    private CompassEventListener listener;
+
     public BuzCartClient(Context context) {
         this.context = context;
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL) //This is the only mandatory call on Builder object.
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(new GsonBuilder().setLenient().serializeSpecialFloatingPointValues().create()))
                 .build();
         buzcartApi = retrofit.create(BuzcartApi.class);
     }
@@ -64,15 +69,19 @@ public class BuzCartClient {
         this.context = context;
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(baseUrl) //This is the only mandatory call on Builder object.
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(new GsonBuilder().setLenient().serializeSpecialFloatingPointValues().create()))
                 .build();
         buzcartApi = retrofit.create(BuzcartApi.class);
+    }
+
+    public void setCompassListener(CompassEventListener listener){
+        this.listener = listener;
     }
 
     public void register(String tagId,
                          final String userName,
                          String password,
-                         String apiId, final BuzCartCallback<UserRegisterResponse> cb) {
+                         String appId, final BuzCartCallback<UserRegisterResponse> cb) {
 
         RegisterReq registerReq = new RegisterReq();
 
@@ -82,7 +91,7 @@ public class BuzCartClient {
 
         registerReq.setPassword(password);
 
-        registerReq.setApiId(apiId);
+        registerReq.setApiId(appId);
 
         Call<RegisterResponse> call = buzcartApi.register(registerReq);
 
@@ -95,12 +104,16 @@ public class BuzCartClient {
                     token = response.body().getToken();
                     userResponse.setSuccess(response.body().getSuccess());
                     userResponse.setMessage(response.body().getMessage());
+
                     if (response.body().getSuccess()) {
                         userResponse.setUrl(response.body().getUrl());
                         if (compass == null) {
+                            Float corrAngle = response.body().getAngle_correction();
                             compass = new Compass(context,
                                     response.body().getOrientationBufferLength(),
-                                    response.body().getOrientation_sampling_interval());
+                                    response.body().getOrientation_sampling_interval(),
+                                    corrAngle);
+                            compass.setOnCompassEventListener(listener);
                             compass.start();
                         }
                     }
@@ -142,7 +155,7 @@ public class BuzCartClient {
 
     }
 
-    public void updateTriggers(Triggers triggers, final BuzCartCallback<BaseResponse> cb) {
+    public void updateTriggers(JsonObject triggers, final BuzCartCallback<BaseResponse> cb) {
 
         if (token == null) {
             cb.onFailure(NOTOKEN);
@@ -163,9 +176,9 @@ public class BuzCartClient {
             cb.onFailure(NOTOKEN);
         }
 
-        Trigger trigger = new Trigger();
+        JsonObject trigger = new JsonObject();
 
-        trigger.setTriggerId(triggerId);
+        trigger.addProperty("triggerId",triggerId);
 
         Call<BaseResponse> call = buzcartApi.ackTrigger(token, trigger);
 
@@ -281,7 +294,9 @@ public class BuzCartClient {
                         if (compass == null) {
                             compass = new Compass(context,
                                     response.body().getOrientation_buffer(),
-                                    response.body().getOrientation_sampling_interval());
+                                    response.body().getOrientation_sampling_interval(),
+                                    null);
+                            compass.setOnCompassEventListener(listener);
                             compass.start();
                         }
                     }

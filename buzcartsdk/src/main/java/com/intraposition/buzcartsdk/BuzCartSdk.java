@@ -12,6 +12,8 @@ import com.intraposition.buzcartsdk.network.PdtTagStatusResponse;
 import com.intraposition.buzcartsdk.network.PdtUserRegisterResponse;
 import com.intraposition.buzcartsdk.network.UserRegisterResponse;
 
+import com.google.gson.JsonObject;
+
 import java.util.List;
 
 
@@ -29,12 +31,12 @@ public class BuzCartSdk {
 
     }
 
-//    public void init(Context context) {
-//
-//        if (buzCartClient == null){
-//            buzCartClient = new BuzCartClient(context);
-//        }
-//    }
+    public void init(Context context) {
+
+        if (buzCartClient == null){
+            buzCartClient = new BuzCartClient(context);
+        }
+    }
 
     public void init(Context context, String baseUrl) {
 
@@ -43,15 +45,21 @@ public class BuzCartSdk {
         }
     }
 
-    public void register(String tagId,
-                         final String userName,
-                         String password,
-                         String apiId, final BuzCartCallback<UserRegisterResponse> cb) {
-        buzCartClient.register(tagId, userName, password, apiId, cb);
+    public void setCompassEventListener(CompassEventListener listener){
+        if (buzCartClient!=null){
+            buzCartClient.setCompassListener(listener);
+        }
     }
 
     public void register(String tagId,
-                         final String userName,
+                         String userName,
+                         String password,
+                         String appId, final BuzCartCallback<UserRegisterResponse> cb) {
+        buzCartClient.register(tagId, userName, password, appId, cb);
+    }
+
+    public void register(String tagId,
+                         String userName,
                          String password,
                          final BuzCartCallback<UserRegisterResponse> cb) {
         buzCartClient.register(tagId, userName, password, cb);
@@ -61,7 +69,7 @@ public class BuzCartSdk {
         buzCartClient.unregister(cb);
     }
 
-    public void updateTriggers(Triggers triggers, final BuzCartCallback<BaseResponse> cb) {
+    public void updateTriggers(JsonObject triggers, final BuzCartCallback<BaseResponse> cb) {
         buzCartClient.updateTriggers(triggers, cb);
     }
 

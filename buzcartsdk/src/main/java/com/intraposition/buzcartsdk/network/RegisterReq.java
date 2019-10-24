@@ -8,7 +8,7 @@ public class RegisterReq extends PdtRegisterReq {
 //
 //    private String password;
 
-    private String apiId;
+    private String appId;
 
 //    public String getTagId() {
 //        return tagId;
@@ -34,11 +34,11 @@ public class RegisterReq extends PdtRegisterReq {
 //        this.password = password;
 //    }
 
-    public String getApiId() {
-        return apiId;
+    public String getAppId() {
+        return appId;
     }
 
-    public void setApiId(String apiId) {
-        this.apiId = apiId;
+    public void setApiId(String appId) {
+        this.appId = appId;
     }
 }

@@ -7,94 +7,215 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
 
-import static android.content.ContentValues.TAG;
 
-class Compass implements SensorEventListener {
+import com.kircherelectronics.fsensor.filter.averaging.LowPassFilter;
+import com.kircherelectronics.fsensor.filter.averaging.MeanFilter;
+import com.kircherelectronics.fsensor.filter.averaging.MedianFilter;
+import com.kircherelectronics.fsensor.filter.gyroscope.OrientationGyroscope;
+import com.kircherelectronics.fsensor.filter.gyroscope.fusion.complimentary.OrientationFusedComplimentary;
+import com.kircherelectronics.fsensor.filter.gyroscope.fusion.kalman.OrientationFusedKalman;
+import com.kircherelectronics.fsensor.util.rotation.RotationUtil;
 
-    private static final float alpha = 0.97f;
+import org.apache.commons.math3.complex.Quaternion;
 
-    private SensorManager sensorManager;
-    private Sensor gsensor;
-    private Sensor msensor;
+import static android.content.Context.SENSOR_SERVICE;
 
-    private float[] mGravity = new float[3];
-    private float[] mGeomagnetic = new float[3];
-    private float[] R = new float[9];
-    private float[] I = new float[9];
+public class Compass implements SensorEventListener {
 
-    private float azimuth;
+    private static final String TAG = Compass.class.getSimpleName();
+
+    private enum Mode {
+        GYROSCOPE_ONLY,
+        COMPLIMENTARY_FILTER,
+        KALMAN_FILTER;
+    }
+
+    private enum FilterMode {
+
+        MEDIAN,
+        MEAN,
+        LOWPASS
+    }
+
+    private SensorManager mSensorManager = null;
+
+    private OrientationGyroscope orientationGyroscope;
+    private OrientationFusedComplimentary orientationComplimentaryFusion;
+    private OrientationFusedKalman orientationKalmanFusion;
+
+    private float[] fusedOrientation = new float[3];
+
+    private float[] rotation = new float[3];
+    private float[] acceleration = new float[4];
+    private float[] magnetic = new float[3];
+
+    private boolean hasAcceleration = false;
+    private boolean hasMagnetic = false;
+
+    private MeanFilter meanFilter;
+
+    private MeanFilter directionFilter;
+
+    private MedianFilter medianFilter;
+
+    private LowPassFilter lowPassFilter;
+
+    private FilterMode mode = FilterMode.MEAN;
+
+    private Mode computeMode = Mode.COMPLIMENTARY_FILTER;
 
     private Averager averager;
 
-    public Compass(Context context, Integer bufferLen, Integer samplingRate) {
+    private MapRotator mapRotator;
 
-        averager = new Averager(bufferLen,samplingRate);
+    private Float angleCorrection;
 
-        sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
+    private long lastUpdate;
 
-        gsensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        msensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+    public Compass(Context context, Integer bufferLen, Integer samplingRate, Float angleCorrection) {
+
+        this.angleCorrection = angleCorrection;
+
+        averager = new Averager(bufferLen, samplingRate);
+
+        orientationGyroscope = new OrientationGyroscope();
+
+        orientationComplimentaryFusion = new OrientationFusedComplimentary();
+
+        orientationKalmanFusion = new OrientationFusedKalman();
+
+        meanFilter = new MeanFilter();
+
+        directionFilter = new MeanFilter();
+
+        medianFilter = new MedianFilter();
+
+        lowPassFilter = new LowPassFilter();
+
+        lastUpdate = System.currentTimeMillis();
+
+        // get sensorManager and initialise sensor listeners
+        mSensorManager = (SensorManager) context.getSystemService(SENSOR_SERVICE);
+    }
+
+
+    // This function registers sensor listeners for the accelerometer, magnetometer and gyroscope.
+    public void initListeners() {
+        mSensorManager.registerListener(this,
+                mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+                SensorManager.SENSOR_DELAY_FASTEST);
+
+        mSensorManager.registerListener(this,
+                mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE),
+                SensorManager.SENSOR_DELAY_FASTEST);
+
+        mSensorManager.registerListener(this,
+                mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),
+                SensorManager.SENSOR_DELAY_FASTEST);
     }
 
     public void start() {
-        sensorManager.registerListener(this, gsensor, SensorManager.SENSOR_DELAY_GAME);
-        sensorManager.registerListener(this, msensor, SensorManager.SENSOR_DELAY_GAME);
+        initListeners();
     }
 
     public void stop() {
-        sensorManager.unregisterListener(this);
+        mSensorManager.unregisterListener(this);
     }
 
     @Override
-    public void onSensorChanged(SensorEvent sensorEvent) {
-        synchronized (this) {
-            if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+    public void onSensorChanged(SensorEvent event) {
 
-                mGravity[0] = alpha * mGravity[0] + (1 - alpha)
-                        * sensorEvent.values[0];
-                mGravity[1] = alpha * mGravity[1] + (1 - alpha)
-                        * sensorEvent.values[1];
-                mGravity[2] = alpha * mGravity[2] + (1 - alpha)
-                        * sensorEvent.values[2];
+        switch (event.sensor.getType()) {
+            case Sensor.TYPE_GYROSCOPE:
+                // Android reuses events, so you probably want a copy
+                System.arraycopy(event.values, 0, rotation, 0, event.values.length);
+                calculateOrientation(event);
+                break;
+            case Sensor.TYPE_MAGNETIC_FIELD:
+                // Android reuses events, so you probably want a copy
+                System.arraycopy(event.values, 0, magnetic, 0, event.values.length);
+                hasMagnetic = true;
+                break;
+            case Sensor.TYPE_ACCELEROMETER:
+                System.arraycopy(event.values, 0, acceleration, 0, event.values.length);
+                hasAcceleration = true;
+                break;
+        }
 
-            }
-            if (sensorEvent.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
 
-                mGeomagnetic[0] = alpha * mGeomagnetic[0] + (1 - alpha)
-                        * sensorEvent.values[0];
-                mGeomagnetic[1] = alpha * mGeomagnetic[1] + (1 - alpha)
-                        * sensorEvent.values[1];
-                mGeomagnetic[2] = alpha * mGeomagnetic[2] + (1 - alpha)
-                        * sensorEvent.values[2];
+    }
 
-            }
-            boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
+    private void calculateOrientation(SensorEvent event) {
 
-            if (success) {
-                float orientation[] = new float[3];
-                SensorManager.getOrientation(R, orientation);
-                setAzimuth((float) Math.toDegrees(orientation[0])); // orientation
-                float heading = (getAzimuth() + 360) % 360;
-                averager.update(heading);
-                Log.d(TAG, "azimuth (deg): " + heading);
+        switch (computeMode) {
+            case GYROSCOPE_ONLY:
+                if (!orientationGyroscope.isBaseOrientationSet()) {
+                    orientationGyroscope.setBaseOrientation(Quaternion.IDENTITY);
+                } else {
+                    fusedOrientation = orientationGyroscope.calculateOrientation(rotation, event.timestamp);
+                }
+
+                break;
+            case COMPLIMENTARY_FILTER:
+                if (!orientationComplimentaryFusion.isBaseOrientationSet()) {
+                    if (hasAcceleration && hasMagnetic) {
+                        orientationComplimentaryFusion.setBaseOrientation(RotationUtil.getOrientationVectorFromAccelerationMagnetic(acceleration, magnetic));
+                    }
+                } else {
+                    fusedOrientation = orientationComplimentaryFusion.calculateFusedOrientation(rotation, event.timestamp, acceleration, magnetic);
+//                    Log.d("kbk", "Process Orientation Fusion Complimentary: " + Arrays.toString(fusedOrientation));
+                }
+
+                break;
+            case KALMAN_FILTER:
+
+                if (!orientationKalmanFusion.isBaseOrientationSet()) {
+                    if (hasAcceleration && hasMagnetic) {
+                        orientationKalmanFusion.setBaseOrientation(RotationUtil.getOrientationVectorFromAccelerationMagnetic(acceleration, magnetic));
+                    }
+                } else {
+                    fusedOrientation = orientationKalmanFusion.calculateFusedOrientation(rotation, event.timestamp, acceleration, magnetic);
+                }
+                break;
+        }
+
+        switch (mode) {
+            case LOWPASS:
+                fusedOrientation = lowPassFilter.filter(fusedOrientation);
+                break;
+            case MEAN:
+                fusedOrientation = meanFilter.filter(fusedOrientation);
+                break;
+            case MEDIAN:
+                fusedOrientation = medianFilter.filter(fusedOrientation);
+                break;
+        }
+        float heading = ((float) Math.toDegrees(fusedOrientation[2]) + 360) % 360;
+        averager.update(heading);
+        if (mapRotator != null) {
+            if (System.currentTimeMillis() - lastUpdate > 100) {
+                Log.d("MapRot", "azimuth (deg): " + heading);
+                lastUpdate = System.currentTimeMillis();
+                mapRotator.rotate(heading);
             }
         }
+
+
     }
 
     @Override
-    public void onAccuracyChanged(Sensor sensor, int i) {
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
     }
 
-    public float getAzimuth() {
-        return azimuth;
-    }
-
-    public void setAzimuth(float azimuth) {
-        this.azimuth = azimuth;
-    }
-
-    public double [] getOrientationBuffer(){
+    public double[] getOrientationBuffer() {
         return averager.getOrientationBuffer();
     }
+
+
+    public void setOnCompassEventListener(CompassEventListener listener) {
+        mapRotator = new MapRotator(listener);
+        mapRotator.setCorrection(this.angleCorrection);
+    }
 }
+

@@ -8,6 +8,8 @@ public class RegisterResponse extends UserRegisterResponse{
 
     private Integer orientation_sampling_interval;
 
+    private Float angle_correction;
+
     public String getToken() {
         return token;
     }
@@ -30,5 +32,13 @@ public class RegisterResponse extends UserRegisterResponse{
 
     public void setOrientation_sampling_interval(Integer orientation_sampling_interval) {
         this.orientation_sampling_interval = orientation_sampling_interval;
+    }
+
+    public Float getAngle_correction() {
+        return angle_correction;
+    }
+
+    public void setAngle_correction(Float angle_correction) {
+        this.angle_correction = angle_correction;
     }
 }
