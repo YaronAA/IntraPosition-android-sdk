@@ -8,7 +8,7 @@ import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.Url;
 
-public interface BuzCartApi {
+interface BuzCartApi {
 
     String Authorization = "authorization";
     String Retrofit_Header = "content-type: application/json";
