@@ -1,5 +1,7 @@
 package com.intraposition.buzcartsdk.Models;
 
+import com.intraposition.buzcartsdk.BuzCart.BuzCartSdk;
+
 public class Trigger {
 
     private String triggerId;
