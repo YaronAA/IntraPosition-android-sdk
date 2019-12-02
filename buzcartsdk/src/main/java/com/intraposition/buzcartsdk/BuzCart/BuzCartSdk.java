@@ -2,6 +2,7 @@ package com.intraposition.buzcartsdk.BuzCart;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -131,7 +132,7 @@ public class BuzCartSdk {
 
     public void unregister(final BuzCartCallback<BaseResponse> cb) {
 
-        Call<JsonObject> call = buzcartApi.makeRequest(WebServicesURLs.Unregister_URL,token, "");
+        Call<JsonObject> call = buzcartApi.makeRequest(WebServicesURLs.Unregister_URL,token, new Object());
 
         call.enqueue(new Callback<JsonObject>() {
             @Override
@@ -274,7 +275,7 @@ public class BuzCartSdk {
 
     public void orderClose(final BuzCartCallback<BaseResponse> cb) {
 
-        Call<JsonObject> call = buzcartApi.makeRequest(WebServicesURLs.Close_Order_URL, token, "");
+        Call<JsonObject> call = buzcartApi.makeRequest(WebServicesURLs.Close_Order_URL, token, new Object());
         call.enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
@@ -299,7 +300,7 @@ public class BuzCartSdk {
 
     public void orderRefresh(final BuzCartCallback<OrderUpdateResponse> cb) {
 
-        Call<JsonObject> call = buzcartApi.makeRequest(WebServicesURLs.Refresh_Order_URL, token,"");
+        Call<JsonObject> call = buzcartApi.makeRequest(WebServicesURLs.Refresh_Order_URL, token,new Object());
         call.enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
@@ -410,7 +411,7 @@ public class BuzCartSdk {
 
     public void pdtGetTagStatus(final BuzCartCallback<PdtTagStatusResponse> cb){
 
-        Call<JsonObject> call = buzcartApi.makeRequest(WebServicesURLs.PDT_Tag_Status_URL, pdtToken,"");
+        Call<JsonObject> call = buzcartApi.makeRequest(WebServicesURLs.PDT_Tag_Status_URL, pdtToken,new Object());
         call.enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
