@@ -2,7 +2,6 @@ package com.intraposition.buzcartsdk.BuzCart;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -87,7 +86,7 @@ public class BuzCartSdk {
 
         final RegisterReq registerReq = new RegisterReq(tagId,userName, password, appId);
 
-        Call<JsonObject> call = buzcartApi.makeRequest(WebServicesURLs.Register_URL,"",registerReq);
+        Call<JsonObject> call = buzcartApi.makePostRequest(WebServicesURLs.Register_URL,"",registerReq);
 
         call.enqueue(new Callback<JsonObject>() {
             @Override
@@ -132,7 +131,7 @@ public class BuzCartSdk {
 
     public void unregister(final BuzCartCallback<BaseResponse> cb) {
 
-        Call<JsonObject> call = buzcartApi.makeRequest(WebServicesURLs.Unregister_URL,token, new Object());
+        Call<JsonObject> call = buzcartApi.makePostRequest(WebServicesURLs.Unregister_URL,token, new Object());
 
         call.enqueue(new Callback<JsonObject>() {
             @Override
@@ -156,7 +155,7 @@ public class BuzCartSdk {
 
     public void updateTriggers(JsonObject triggers, final BuzCartCallback<BaseResponse> cb) {
 
-        Call<JsonObject> call = buzcartApi.makeRequest(WebServicesURLs.Update_Trigger_URL,token, triggers);
+        Call<JsonObject> call = buzcartApi.makePostRequest(WebServicesURLs.Update_Trigger_URL,token, triggers);
 
         call.enqueue(new Callback<JsonObject>() {
             @Override
@@ -184,7 +183,7 @@ public class BuzCartSdk {
 
         trigger.addProperty("triggerId",triggerId);
 
-        Call<JsonObject> call = buzcartApi.makeRequest(WebServicesURLs.ACK_Triggers_URL,token, trigger);
+        Call<JsonObject> call = buzcartApi.makePostRequest(WebServicesURLs.ACK_Triggers_URL,token, trigger);
 
         call.enqueue(new Callback<JsonObject>() {
             @Override
@@ -219,7 +218,7 @@ public class BuzCartSdk {
         Orders orders = new Orders();
         orders.setOrders(orderList);
 
-        Call<JsonObject> call = buzcartApi.makeRequest(WebServicesURLs.Update_Order_URL,token, orders);
+        Call<JsonObject> call = buzcartApi.makePostRequest(WebServicesURLs.Update_Order_URL,token, orders);
 
         call.enqueue(new Callback<JsonObject>() {
             @Override
@@ -252,7 +251,7 @@ public class BuzCartSdk {
             product.setOrientation(compass.getOrientationBuffer());
         }
 
-        Call<JsonObject> call = buzcartApi.makeRequest(WebServicesURLs.Update_Product_URL, token, product);
+        Call<JsonObject> call = buzcartApi.makePostRequest(WebServicesURLs.Update_Product_URL, token, product);
         call.enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
@@ -275,7 +274,7 @@ public class BuzCartSdk {
 
     public void orderClose(final BuzCartCallback<BaseResponse> cb) {
 
-        Call<JsonObject> call = buzcartApi.makeRequest(WebServicesURLs.Close_Order_URL, token, new Object());
+        Call<JsonObject> call = buzcartApi.makePostRequest(WebServicesURLs.Close_Order_URL, token, new Object());
         call.enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
@@ -300,7 +299,7 @@ public class BuzCartSdk {
 
     public void orderRefresh(final BuzCartCallback<OrderUpdateResponse> cb) {
 
-        Call<JsonObject> call = buzcartApi.makeRequest(WebServicesURLs.Refresh_Order_URL, token,new Object());
+        Call<JsonObject> call = buzcartApi.makePostRequest(WebServicesURLs.Refresh_Order_URL, token,new Object());
         call.enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
@@ -329,7 +328,7 @@ public class BuzCartSdk {
 
         PdtRegisterReq registerReq = new PdtRegisterReq(tagId,userName,password);
 
-        Call<JsonObject> call = buzcartApi.makeRequest(WebServicesURLs.PDT_Register_URL,"",registerReq);
+        Call<JsonObject> call = buzcartApi.makePostRequest(WebServicesURLs.PDT_Register_URL,"",registerReq);
 
         call.enqueue(new Callback<JsonObject>() {
             @Override
@@ -387,7 +386,7 @@ public class BuzCartSdk {
             pdtProduct.setOrientation(compass.getOrientationBuffer());
         }
 
-        Call<JsonObject> call = buzcartApi.makeRequest(WebServicesURLs.PDT_Update_Product_URL, pdtToken, pdtProduct);
+        Call<JsonObject> call = buzcartApi.makePostRequest(WebServicesURLs.PDT_Update_Product_URL, pdtToken, pdtProduct);
         call.enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
@@ -411,7 +410,7 @@ public class BuzCartSdk {
 
     public void pdtGetTagStatus(final BuzCartCallback<PdtTagStatusResponse> cb){
 
-        Call<JsonObject> call = buzcartApi.makeRequest(WebServicesURLs.PDT_Tag_Status_URL, pdtToken,new Object());
+        Call<JsonObject> call = buzcartApi.makeGetRequest(WebServicesURLs.PDT_Tag_Status_URL, pdtToken);
         call.enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {

@@ -3,6 +3,7 @@ package com.intraposition.buzcartsdk.BuzCart;
 import com.google.gson.JsonObject;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
@@ -15,5 +16,9 @@ interface BuzCartApi {
 
     @Headers(Retrofit_Header)
     @POST()
-    Call<JsonObject> makeRequest(@Url String url, @Header(Authorization) String token, @Body Object object);
+    Call<JsonObject> makePostRequest(@Url String url, @Header(Authorization) String token, @Body Object object);
+
+    @Headers(Retrofit_Header)
+    @GET()
+    Call<JsonObject> makeGetRequest(@Url String url, @Header(Authorization) String token);
 }
