@@ -4,6 +4,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.util.Log;
 
 import static android.content.Context.SENSOR_SERVICE;
 
@@ -74,8 +75,17 @@ public class Compass implements SensorEventListener {
             float pitch = (float)Math.toDegrees(orientation[1]);
             float roll = (float)Math.toDegrees(orientation[2]);
             averager.update(azimuth);
+            if (mapRotator != null) {
+                if (System.currentTimeMillis() - lastUpdate > 100) {
+                    Log.d("MapRot", "azimuth (deg): " + azimuth);
+                    lastUpdate = System.currentTimeMillis();
+                    mapRotator.rotate(azimuth);
+                }
+            }
+
         }
     }
+
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
